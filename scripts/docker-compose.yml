@@ -1,0 +1,23 @@
+version: '2'
+services:
+  consul-server-node:
+    image: consul:1.12.0
+    container_name: consul-server-node
+    restart: unless-stopped
+    ports:
+      - "8500:8500"
+    networks:
+      consul_network:
+        ipv4_address: 172.30.0.102
+    command: ["agent", "-ui", "-server", "-bootstrap-expect=1", "-client=0.0.0.0", "-datacenter=local-dc", "-node=server-1"]
+  consul-client-node:
+    image: consul:1.12.0
+    depends_on:
+      - consul-server-node
+    container_name: consul-client-node
+    networks:
+      - consul_network
+    command: ["agent", "-node=client-1", "-retry-join=172.30.0.102", "-retry-interval=2s", "-datacenter=local-dc"]
+networks:
+  consul_network:
+    external: true
